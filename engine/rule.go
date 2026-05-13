@@ -17,7 +17,7 @@ type Rule struct {
 }
 
 func (r *Rule) PathGroup() *core.PathGroup {
-	return nil
+	return r.pathGroup
 }
 
 func (r *Rule) ID() string {

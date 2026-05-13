@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -58,8 +59,48 @@ func (n RelationNode) Kind() string {
 	return n.Type
 }
 
-func (n RelationNode) Transform(m RuleMeta) (core.Relation, error) {
-	node, err := n.createRelatioon()
+// UnmarshalJSON handles nested RelationNode/ConditionNode children from JSON.
+func (n *RelationNode) UnmarshalJSON(data []byte) error {
+	type alias struct {
+		BaseNode
+		Children []json.RawMessage `json:"children"`
+	}
+	var tmp alias
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	n.BaseNode = tmp.BaseNode
+	n.Children = make([]ConfigNode, 0, len(tmp.Children))
+	for _, raw := range tmp.Children {
+		var base struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(raw, &base); err != nil {
+			return err
+		}
+		switch strings.ToLower(base.Type) {
+		case "relation":
+			var r RelationNode
+			if err := json.Unmarshal(raw, &r); err != nil {
+				return err
+			}
+			n.Children = append(n.Children, r)
+		case "condition":
+			var c ConditionNode
+			if err := json.Unmarshal(raw, &c); err != nil {
+				return err
+			}
+			n.Children = append(n.Children, c)
+		default:
+			return fmt.Errorf("unknown node type %q", base.Type)
+		}
+	}
+	return nil
+}
+
+// Transform converts RelationNode into a core.Relation with fully-built children.
+func (n RelationNode) Transform(m RuleMeta) (core.Node, error) {
+	node, err := n.createRelation()
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +117,7 @@ func (n RelationNode) Transform(m RuleMeta) (core.Relation, error) {
 	return node, nil
 }
 
-func (n RelationNode) createRelatioon() (core.Relation, error) {
+func (n RelationNode) createRelation() (core.Relation, error) {
 	if strings.EqualFold("and", n.Sign) {
 		and := logic.NewAND()
 		and.SetID(n.ID).SetName(n.Name)
@@ -128,6 +169,22 @@ func (n ConditionNode) SetProperties(p map[string]interface{}) {
 	n.Props = p
 }
 
+// Transform builds a compiled core.Condition using the registered ConditionCreator.
 func (n ConditionNode) Transform(m RuleMeta) (core.Node, error) {
-	return nil, nil
+	creator, err := GetConditionCreator(m.ID(), n.Sign)
+	if err != nil {
+		return nil, fmt.Errorf("no creator for condition sign %q: %w", n.Sign, err)
+	}
+	cond, err := creator.Create(n)
+	if err != nil {
+		return nil, fmt.Errorf("create condition %q: %w", n.Sign, err)
+	}
+	cond.SetRuleID(m.ID())
+	if v := cond.Validate(); !v.Valid {
+		return nil, fmt.Errorf("invalid condition [%s]: %s", n.Sign, v.Message)
+	}
+	if err := cond.Compile(); err != nil {
+		return nil, fmt.Errorf("compile condition [%s]: %w", n.Sign, err)
+	}
+	return cond, nil
 }

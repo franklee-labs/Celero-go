@@ -33,7 +33,14 @@ func negate(n core.Node) (core.Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewANDWithPath(core.NewPath(append(make([]core.Condition, 0, 1), tmp))), nil
+		if v := tmp.Validate(); !v.Valid {
+			return nil, errors.New("invalid condition after negation: " + v.Message)
+		}
+		err = tmp.Compile()
+		if err != nil {
+			return nil, err
+		}
+		return tmp, nil
 	} else {
 		return nil, errors.New("unsupported NodeKind[" + strconv.Itoa(int(n.Type())) + "]")
 	}

@@ -6,6 +6,17 @@ type Solutions struct {
 	solutions []Solution
 }
 
+func (s Solutions) Count() int {
+	return len(s.solutions)
+}
+
+func (s Solutions) SolutionAt(index int) (Solution, bool) {
+	if index < 0 || index >= len(s.solutions) {
+		return Solution{}, false
+	}
+	return s.solutions[index], true
+}
+
 func createSolutions(group *core.PathGroup) Solutions {
 	solutions := make([]Solution, 0, group.Size())
 	for i := 0; i < group.Size(); i++ {
@@ -26,6 +37,17 @@ type Solution struct {
 
 func (s Solution) Conditions() []Condition {
 	return s.conditions
+}
+
+func (s Solution) Count() int {
+	return len(s.conditions)
+}
+
+func (s Solution) ConditionAt(index int) (Condition, bool) {
+	if index < 0 || index >= len(s.conditions) {
+		return Condition{}, false
+	}
+	return s.conditions[index], true
 }
 
 type Condition struct {

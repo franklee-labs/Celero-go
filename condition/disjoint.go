@@ -39,6 +39,9 @@ func NewDisjointCondition(field1, valueType1, field2, valueType2 string, cfg *co
 	if c.Name() == "" {
 		c.SetName(c.generateName())
 	}
+	if err := c.setValueType(valueType1, valueType2); err != nil {
+		c.initErr = err
+	}
 	return c
 }
 
@@ -57,6 +60,9 @@ func (c *DisjointCondition) setValueType(valueType1, valueType2 string) error {
 }
 
 func (c *DisjointCondition) Validate() core.Validation {
+	if c.initErr != nil {
+		return core.Invalid(c.initErr.Error())
+	}
 	if c.valueType1 != core.ValueTypeList && c.valueType1 != core.ValueTypeExpression {
 		return core.Invalid("invalid value type. support [List, Expression]")
 	}

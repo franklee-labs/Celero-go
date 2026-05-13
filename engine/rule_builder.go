@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/franklee-labs/celero-go/core"
 	"github.com/franklee-labs/celero-go/rules"
 )
 
@@ -49,9 +50,13 @@ func (b *RuleBuilder) Build() (*CeleroRule, error) {
 		return nil, fmt.Errorf("rule id must not be nil")
 	}
 	ruleMeta := rules.CreateRuleMeta(b.id, b.name)
-	node, err := b.root.Transform(ruleMeta)
+	rawNode, err := b.root.Transform(ruleMeta)
 	if err != nil {
 		return nil, err
+	}
+	node, ok := rawNode.(core.Relation)
+	if !ok {
+		return nil, fmt.Errorf("failed to transform root node")
 	}
 	rule := createRule(b.id, b.name, b.description, b.cacheable, node)
 	err = rule.Build()
@@ -67,7 +72,7 @@ func NewRuleBuilder() *RuleBuilder {
 
 func FromJSON(id, jsonRules string) (*RuleBuilder, error) {
 	b := NewRuleBuilder()
-	b.id = id
+	b.ID(id)
 	var m map[string]interface{}
 	msg := json.RawMessage(jsonRules)
 	err := json.Unmarshal(msg, &m)
@@ -82,7 +87,7 @@ func FromJSON(id, jsonRules string) (*RuleBuilder, error) {
 				if err != nil {
 					return nil, err
 				}
-				b.root = &r
+				b.Root(&r)
 				return b, nil
 			} else if strings.ToLower(tp) == "condition" {
 				var c rules.ConditionNode
@@ -90,7 +95,7 @@ func FromJSON(id, jsonRules string) (*RuleBuilder, error) {
 				if err != nil {
 					return nil, err
 				}
-				b.root = wrap(c)
+				b.Root(wrap(c))
 				return b, nil
 			} else {
 				return nil, fmt.Errorf("invalid type")

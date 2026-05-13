@@ -39,6 +39,11 @@ func NewIntersectCondition(field1, valueType1, field2, valueType2 string, cfg *c
 	if c.Name() == "" {
 		c.SetName(c.generateName())
 	}
+	// setValueType converts the string type params to ValueType enum; store any
+	// parse error in initErr so Validate() can report it via the invalid-type check.
+	if err := c.setValueType(valueType1, valueType2); err != nil {
+		c.initErr = err
+	}
 	return c
 }
 
@@ -57,6 +62,9 @@ func (c *IntersectCondition) setValueType(valueType1, valueType2 string) error {
 }
 
 func (c *IntersectCondition) Validate() core.Validation {
+	if c.initErr != nil {
+		return core.Invalid(c.initErr.Error())
+	}
 	if c.valueType1 != core.ValueTypeList && c.valueType1 != core.ValueTypeExpression {
 		return core.Invalid("invalid value type. support [List, Expression]")
 	}
