@@ -45,7 +45,7 @@ func (e *AdvancedEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 }
 
 func (e *AdvancedEngine) Evaluate(rule *CeleroRule, ctx *RuleContext) (core.EvalResult, error) {
-	context, err := buildContext(ctx, rule.IsCacheable(), false)
+	context, err := buildContext(ctx, rule.IsCacheable(), true)
 	miss := false
 	if err != nil {
 		return core.EvalResultUnknown, err

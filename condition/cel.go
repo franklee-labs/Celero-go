@@ -41,7 +41,7 @@ func (c *CELCondition) Expression() string {
 	return c.expression
 }
 func (c *CELCondition) BeforeEvaluate(ctx core.EvalContext) error {
-	return nil
+	return ctx.BuildEvalParams(nil)
 }
 
 func (c *CELCondition) Negate() (core.Condition, error) {

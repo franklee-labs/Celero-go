@@ -48,7 +48,7 @@ func (c *NegateRegexpCondition) Expression() string {
 	return c.expression
 }
 func (c *NegateRegexpCondition) BeforeEvaluate(ctx core.EvalContext) error {
-	return nil
+	return ctx.BuildEvalParams(nil)
 }
 
 func (c *NegateRegexpCondition) Negate() (core.Condition, error) {

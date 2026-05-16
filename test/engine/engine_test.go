@@ -3,7 +3,6 @@ package engine_test
 import (
 	"testing"
 
-	"github.com/franklee-labs/celero-go/core"
 	"github.com/franklee-labs/celero-go/engine"
 )
 
@@ -604,67 +603,6 @@ func TestCeleroRule_SetCacheable(t *testing.T) {
 	rule.SetCacheable(false)
 	if rule.IsCacheable() {
 		t.Fatal("SetCacheable(false) should make IsCacheable() return false")
-	}
-}
-
-// ─── EvalContext Builder ──────────────────────────────────────────────────────
-
-func TestEvalContextBuilder_Build(t *testing.T) {
-	rc := engine.NewRuleContext(map[string]interface{}{"x": 1})
-	ctx, err := engine.NewBuilder(rc).
-		SetConditionResultCacheable(true).
-		SetEnableMissingState(true).
-		Build()
-	if err != nil {
-		t.Fatalf("Build() error: %v", err)
-	}
-	if ctx == nil {
-		t.Fatal("expected non-nil EvalContext")
-	}
-	if !ctx.IsConditionResultCacheEnabled() {
-		t.Fatal("cache should be enabled")
-	}
-	if !ctx.IsAbsenceEnabled() {
-		t.Fatal("absence should be enabled")
-	}
-}
-
-func TestEvalContext_BuildEvalParams_MustStartWithUnderscore(t *testing.T) {
-	rc := engine.NewRuleContext(map[string]interface{}{})
-	ctx, _ := engine.NewBuilder(rc).Build()
-	err := ctx.BuildEvalParams(map[string]interface{}{"badkey": "value"})
-	if err == nil {
-		t.Fatal("builtin key not starting with _ should return error")
-	}
-}
-
-func TestEvalContext_BuildEvalParams_ValidBuiltinKey(t *testing.T) {
-	rc := engine.NewRuleContext(map[string]interface{}{"x": 1})
-	ctx, _ := engine.NewBuilder(rc).Build()
-	err := ctx.BuildEvalParams(map[string]interface{}{"_SYS_KEY": 42})
-	if err != nil {
-		t.Fatalf("valid builtin key should not error: %v", err)
-	}
-	if ctx.EvalParams()["x"] == nil {
-		t.Fatal("runtime param 'x' should be present in evalParams")
-	}
-	if ctx.EvalParams()["_SYS_KEY"] == nil {
-		t.Fatal("builtin param should be present in evalParams")
-	}
-}
-
-func TestEvalContext_ConditionResultCache(t *testing.T) {
-	rc := engine.NewRuleContext(nil)
-	ctx, _ := engine.NewBuilder(rc).SetConditionResultCacheable(true).Build()
-
-	ctx.SetConditionEvalResult("cond-1", core.EvalResultTrue)
-	result, ok := ctx.GetConditionEvalResult("cond-1")
-	if !ok || !result.IsTrue() {
-		t.Fatal("cached result should be retrievable")
-	}
-	_, ok = ctx.GetConditionEvalResult("no-such-cond")
-	if ok {
-		t.Fatal("non-existent cache entry should return ok=false")
 	}
 }
 

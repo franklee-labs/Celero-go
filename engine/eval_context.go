@@ -87,7 +87,7 @@ type Builder struct {
 	enableReport             bool
 }
 
-func NewBuilder(rc *RuleContext) *Builder {
+func newBuilder(rc *RuleContext) *Builder {
 	return &Builder{
 		ruleContext:              rc,
 		enableMissingState:       false,

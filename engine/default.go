@@ -8,7 +8,7 @@ import (
 )
 
 func buildContext(ctx *RuleContext, enableConditionResultCache, enableMissingState bool) (*EvalContext, error) {
-	builder := NewBuilder(ctx).SetConditionResultCacheable(enableConditionResultCache).SetEnableMissingState(enableMissingState)
+	builder := newBuilder(ctx).SetConditionResultCacheable(enableConditionResultCache).SetEnableMissingState(enableMissingState)
 	context, err := builder.Build()
 	if err != nil {
 		return nil, err

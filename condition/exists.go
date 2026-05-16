@@ -42,7 +42,7 @@ func (c *ExistsCondition) Expression() string {
 	return c.expression
 }
 func (c *ExistsCondition) BeforeEvaluate(ctx core.EvalContext) error {
-	return nil
+	return ctx.BuildEvalParams(nil)
 }
 
 func (c *ExistsCondition) Negate() (core.Condition, error) {

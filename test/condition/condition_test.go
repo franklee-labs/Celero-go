@@ -6,6 +6,7 @@ import (
 
 	"github.com/franklee-labs/celero-go/condition"
 	"github.com/franklee-labs/celero-go/core"
+	celtypes "github.com/google/cel-go/common/types"
 )
 
 // ─── mock EvalContext ────────────────────────────────────────────────────────
@@ -26,7 +27,7 @@ func newCtx(params map[string]interface{}) *mockCtx {
 	}
 }
 
-func (m *mockCtx) Params() map[string]interface{}  { return m.params }
+func (m *mockCtx) Params() map[string]interface{}      { return m.params }
 func (m *mockCtx) IsConditionResultCacheEnabled() bool { return false }
 func (m *mockCtx) IsAbsenceEnabled() bool              { return m.absEnabled }
 func (m *mockCtx) IsReportEnabled() bool               { return false }
@@ -45,7 +46,7 @@ func (m *mockCtx) BuildEvalParams(p map[string]interface{}) error {
 	return nil
 }
 func (m *mockCtx) EvalParams() map[string]interface{} { return m.evalParams }
-func (m *mockCtx) RuleContext() core.RuleContext       { return nil }
+func (m *mockCtx) RuleContext() core.RuleContext      { return nil }
 func (m *mockCtx) SetConditionEvalResult(id string, r core.EvalResult) {
 	m.cache[id] = r
 }
@@ -279,6 +280,17 @@ func TestCompareGTE_Equal(t *testing.T) {
 	}
 }
 
+func TestCompareGTE_False(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "GTE", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{"age": int64(10)})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || ok {
+		t.Fatalf("10 >= 18 should be false")
+	}
+}
+
 func TestCompareLT_True(t *testing.T) {
 	c := condition.NewCompareCondition("age", "18", "LT", core.ValueTypeNumber, cfg("c1", ""))
 	mustCompile(t, c)
@@ -290,6 +302,17 @@ func TestCompareLT_True(t *testing.T) {
 	}
 }
 
+func TestCompareLT_False(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "LT", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{"age": int64(20)})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || ok {
+		t.Fatalf("20 < 18 should be false")
+	}
+}
+
 func TestCompareLTE_Equal(t *testing.T) {
 	c := condition.NewCompareCondition("age", "18", "LTE", core.ValueTypeNumber, cfg("c1", ""))
 	mustCompile(t, c)
@@ -298,6 +321,17 @@ func TestCompareLTE_Equal(t *testing.T) {
 	ok, _, err := c.Evaluate(ctx)
 	if err != nil || !ok {
 		t.Fatalf("18 <= 18 should be true")
+	}
+}
+
+func TestCompareLTE_False(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "LTE", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{"age": int64(20)})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || ok {
+		t.Fatalf("20 <= 18 should be false")
 	}
 }
 
@@ -825,5 +859,123 @@ func TestDisjoint_NegateProducesIntersect(t *testing.T) {
 	ok, _, err := neg.Evaluate(ctx)
 	if err != nil || !ok {
 		t.Fatalf("negated disjoint (intersect) should be true, got ok=%v err=%v", ok, err)
+	}
+}
+
+// ─── CompareCondition: remaining negateSignStr branches ───────────────────────
+
+// GTE → negate → LT: NOT(age >= 18) at age=10 → age < 18 → true
+func TestCompareNegateGTE_ProducesLT(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "GTE", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	neg, err := c.Negate()
+	if err != nil {
+		t.Fatalf("Negate() error: %v", err)
+	}
+	ctx := newCtx(map[string]interface{}{"age": int64(10)})
+	neg.BeforeEvaluate(ctx)
+	ok, _, err := neg.Evaluate(ctx)
+	if err != nil || !ok {
+		t.Fatalf("NOT(age>=18) at 10 should be true (LT), got ok=%v err=%v", ok, err)
+	}
+}
+
+// LT → negate → GTE: NOT(age < 18) at age=18 → age >= 18 → true
+func TestCompareNegateLT_ProducesGTE(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "LT", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	neg, err := c.Negate()
+	if err != nil {
+		t.Fatalf("Negate() error: %v", err)
+	}
+	ctx := newCtx(map[string]interface{}{"age": int64(18)})
+	neg.BeforeEvaluate(ctx)
+	ok, _, err := neg.Evaluate(ctx)
+	if err != nil || !ok {
+		t.Fatalf("NOT(age<18) at 18 should be true (GTE), got ok=%v err=%v", ok, err)
+	}
+}
+
+// LTE → negate → GT: NOT(age <= 18) at age=20 → age > 18 → true
+func TestCompareNegateLTE_ProducesGT(t *testing.T) {
+	c := condition.NewCompareCondition("age", "18", "LTE", core.ValueTypeNumber, cfg("c1", ""))
+	mustCompile(t, c)
+	neg, err := c.Negate()
+	if err != nil {
+		t.Fatalf("Negate() error: %v", err)
+	}
+	ctx := newCtx(map[string]interface{}{"age": int64(20)})
+	neg.BeforeEvaluate(ctx)
+	ok, _, err := neg.Evaluate(ctx)
+	if err != nil || !ok {
+		t.Fatalf("NOT(age<=18) at 20 should be true (GT), got ok=%v err=%v", ok, err)
+	}
+}
+
+// ─── IsKeyAbsent: types.IsError(out) branch ───────────────────────────────────
+
+// When CEL returns an error *value* (err==nil) containing "no such key",
+// IsKeyAbsent must still detect absence via the types.IsError path.
+func TestIsKeyAbsent_ErrorVal_NoSuchKey(t *testing.T) {
+	errVal := celtypes.NewErr("no such key: missing")
+	if !condition.IsKeyAbsent(errVal, nil) {
+		t.Fatal("error val with 'no such key' should return absent=true")
+	}
+}
+
+func TestIsKeyAbsent_ErrorVal_NoSuchAttribute(t *testing.T) {
+	errVal := celtypes.NewErr("no such attribute: foo")
+	if !condition.IsKeyAbsent(errVal, nil) {
+		t.Fatal("error val with 'no such attribute' should return absent=true")
+	}
+}
+
+func TestIsKeyAbsent_ErrorVal_OtherError(t *testing.T) {
+	errVal := celtypes.NewErr("division by zero")
+	if condition.IsKeyAbsent(errVal, nil) {
+		t.Fatal("unrelated error val should return absent=false")
+	}
+}
+
+// ─── DisjointCondition: List-type Compile branches ────────────────────────────
+
+// Both fields are literal JSON lists → both builtin param branches in Compile are hit.
+func TestDisjoint_BothList_Disjoint(t *testing.T) {
+	c := condition.NewDisjointCondition(`["a","b"]`, "List", `["c","d"]`, "List", cfg("c1", ""))
+	if v := c.Validate(); !v.Valid {
+		t.Fatalf("Validate() should be valid: %s", v.Message)
+	}
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || !ok {
+		t.Fatalf("disjoint literal lists should be true, got ok=%v err=%v", ok, err)
+	}
+}
+
+func TestDisjoint_BothList_HasIntersection(t *testing.T) {
+	c := condition.NewDisjointCondition(`["a","b"]`, "List", `["b","c"]`, "List", cfg("c1", ""))
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || ok {
+		t.Fatalf("intersecting literal lists should not be disjoint")
+	}
+}
+
+// field1 is a literal list, field2 is a runtime expression variable.
+func TestDisjoint_ListAndExpression_Disjoint(t *testing.T) {
+	c := condition.NewDisjointCondition(`["x","y"]`, "List", "tags", "Expression", cfg("c1", ""))
+	if v := c.Validate(); !v.Valid {
+		t.Fatalf("Validate() should be valid: %s", v.Message)
+	}
+	mustCompile(t, c)
+	ctx := newCtx(map[string]interface{}{"tags": []interface{}{"a", "b"}})
+	c.BeforeEvaluate(ctx)
+	ok, _, err := c.Evaluate(ctx)
+	if err != nil || !ok {
+		t.Fatalf("List×Expr disjoint should be true, got ok=%v err=%v", ok, err)
 	}
 }
