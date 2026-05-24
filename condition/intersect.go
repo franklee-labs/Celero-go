@@ -133,7 +133,7 @@ func (c *IntersectCondition) Compile() error {
 			builtinParams[builtin_var] = m
 		}
 	}
-	if builtinParams != nil && len(builtinParams) > 0 {
+	if len(builtinParams) > 0 {
 		c.builtinParams = builtinParams
 	}
 	c.expression = fmt.Sprintf("%s.exists(x, %s.exists(y, y == x))", left, right)
