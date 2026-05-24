@@ -30,12 +30,12 @@ const ruleJSON = `{
   "sign": "AND",
   "children": [
     {
+      "id": "cond-a",
+      "name": "A: email format",
       "type": "condition",
       "sign": "REGEXP",
       "cacheable": true,
       "properties": {
-        "id": "cond-a",
-        "name": "A: email format",
         "priority": 0,
         "field": "email",
         "regexp": "^[\\w.+-]+@[\\w-]+\\.[a-z]{2,}$"
@@ -46,12 +46,12 @@ const ruleJSON = `{
       "sign": "OR",
       "children": [
         {
+          "id": "cond-b",
+          "name": "B: role check",
           "type": "condition",
           "sign": "EQ",
           "cacheable": true,
           "properties": {
-            "id": "cond-b",
-            "name": "B: role check",
             "priority": 0,
             "field": "role",
             "value": "admin",
@@ -59,12 +59,12 @@ const ruleJSON = `{
           }
         },
         {
+          "id": "cond-c",
+          "name": "C: level check",
           "type": "condition",
           "sign": "EQ",
           "cacheable": true,
           "properties": {
-            "id": "cond-c",
-            "name": "C: level check",
             "priority": 0,
             "field": "level",
             "value": "high",

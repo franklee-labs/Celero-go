@@ -7,6 +7,8 @@ import (
 	"github.com/franklee-labs/celero-go/core"
 )
 
+// Rule is the compiled internal representation of a business rule.
+// It holds the expanded PathGroup produced during Build and is wrapped by CeleroRule before being handed to users.
 type Rule struct {
 	id          string
 	name        string
@@ -40,6 +42,8 @@ func (r *Rule) SetCacheable(c bool) {
 	r.cacheable.Store(c)
 }
 
+// Build validates the rule tree and expands it into a flat PathGroup.
+// It must be called once before the rule can be evaluated; RuleBuilder.Build does this automatically.
 func (r *Rule) Build() error {
 	if v := core.ValidateAll(r.root); !v.Valid {
 		return fmt.Errorf("invalid rule %s", v.Message)

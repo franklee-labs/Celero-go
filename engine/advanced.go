@@ -6,12 +6,17 @@ import (
 	"github.com/franklee-labs/celero-go/core"
 )
 
+// AdvancedEngine evaluates rules to a three-valued EvalResult: True, False, or Indeterminate.
+// Indeterminate is returned when a required parameter is absent from the context,
+// allowing callers to distinguish "definitively false" from "cannot yet decide".
+// For plain boolean results use DefaultEngine.
 type AdvancedEngine struct {
 	enableMissingState bool
 	conditionListeners []AdvancedConditionListener
 	ruleListeners      []AdvancedRuleListener
 }
 
+// NewAdvancedEngine returns an AdvancedEngine with missing-state detection enabled and no listeners registered.
 func NewAdvancedEngine() *AdvancedEngine {
 	return &AdvancedEngine{
 		enableMissingState: true,
@@ -20,6 +25,8 @@ func NewAdvancedEngine() *AdvancedEngine {
 	}
 }
 
+// AddConditionListener registers an AdvancedConditionListener. Listeners are sorted by Order()
+// and called after each condition evaluation with the full EvalResult (including Indeterminate).
 func (e *AdvancedEngine) AddConditionListener(listener AdvancedConditionListener) {
 	e.conditionListeners = append(e.conditionListeners, listener)
 	sort.Slice(e.conditionListeners, func(i, j int) bool {
@@ -27,6 +34,8 @@ func (e *AdvancedEngine) AddConditionListener(listener AdvancedConditionListener
 	})
 }
 
+// AddRuleListener registers an AdvancedRuleListener. Listeners are sorted by Order()
+// and called after each rule in Evalutes, receiving an EvalResult instead of a plain bool.
 func (e *AdvancedEngine) AddRuleListener(listener AdvancedRuleListener) {
 	e.ruleListeners = append(e.ruleListeners, listener)
 	sort.Slice(e.ruleListeners, func(i, j int) bool {
@@ -34,6 +43,7 @@ func (e *AdvancedEngine) AddRuleListener(listener AdvancedRuleListener) {
 	})
 }
 
+// Evalutes evaluates all rules against ctx in order and fires AdvancedRuleListeners after each rule.
 func (e *AdvancedEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	for _, rule := range rules {
 		result, err := e.Evaluate(rule, ctx)
@@ -44,6 +54,12 @@ func (e *AdvancedEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	}
 }
 
+// Evaluate runs a single rule against ctx and returns a three-valued EvalResult.
+// True is returned as soon as any path fully matches.
+// If no path is True but at least one path is Indeterminate, Indeterminate is returned.
+// False is returned only when every path has a definitive failure.
+// AdvancedConditionListeners are fired after each condition evaluation.
+// AdvancedRuleListeners are NOT fired here; use Evalutes for rule-level callbacks.
 func (e *AdvancedEngine) Evaluate(rule *CeleroRule, ctx *RuleContext) (core.EvalResult, error) {
 	context, err := buildContext(ctx, rule.IsCacheable(), true)
 	if err != nil {

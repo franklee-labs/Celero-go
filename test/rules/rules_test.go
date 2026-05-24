@@ -192,9 +192,9 @@ func TestBoolValue_WrongType(t *testing.T) {
 
 func TestBuildConditionConfig_Valid(t *testing.T) {
 	node := rules.ConditionNode{}
+	node.ID = "c1"
+	node.Name = "my condition"
 	node.Props = map[string]interface{}{
-		"id":       "c1",
-		"name":     "my condition",
 		"priority": float64(0),
 	}
 	cfg, err := rules.BuildConditionConfig(node)
@@ -208,8 +208,8 @@ func TestBuildConditionConfig_Valid(t *testing.T) {
 
 func TestBuildConditionConfig_MissingID(t *testing.T) {
 	node := rules.ConditionNode{}
+	node.Name = "my condition"
 	node.Props = map[string]interface{}{
-		"name":     "my condition",
 		"priority": float64(0),
 	}
 	_, err := rules.BuildConditionConfig(node)
@@ -220,8 +220,8 @@ func TestBuildConditionConfig_MissingID(t *testing.T) {
 
 func TestBuildConditionConfig_MissingName(t *testing.T) {
 	node := rules.ConditionNode{}
+	node.ID = "c1"
 	node.Props = map[string]interface{}{
-		"id":       "c1",
 		"priority": float64(0),
 	}
 	_, err := rules.BuildConditionConfig(node)
@@ -232,10 +232,9 @@ func TestBuildConditionConfig_MissingName(t *testing.T) {
 
 func TestBuildConditionConfig_MissingPriority(t *testing.T) {
 	node := rules.ConditionNode{}
-	node.Props = map[string]interface{}{
-		"id":   "c1",
-		"name": "my condition",
-	}
+	node.ID = "c1"
+	node.Name = "my condition"
+	node.Props = map[string]interface{}{}
 	_, err := rules.BuildConditionConfig(node)
 	if err == nil {
 		t.Fatal("missing 'priority' should return error")
@@ -244,9 +243,9 @@ func TestBuildConditionConfig_MissingPriority(t *testing.T) {
 
 func TestBuildConditionConfig_CacheableAndIgnoreAbsence(t *testing.T) {
 	node := rules.ConditionNode{Cacheable: true, IgnoreAbsence: true}
+	node.ID = "c1"
+	node.Name = "n"
 	node.Props = map[string]interface{}{
-		"id":       "c1",
-		"name":     "n",
 		"priority": float64(0),
 	}
 	cfg, err := rules.BuildConditionConfig(node)
@@ -262,6 +261,8 @@ func TestBuildConditionConfig_CacheableAndIgnoreAbsence(t *testing.T) {
 
 func makeConditionNode(sign string, props map[string]interface{}) rules.ConditionNode {
 	n := rules.ConditionNode{}
+	n.ID = "c1"
+	n.Name = "test-cond"
 	n.Sign = sign
 	n.Type = "condition"
 	n.Props = props
@@ -270,8 +271,6 @@ func makeConditionNode(sign string, props map[string]interface{}) rules.Conditio
 
 func baseProps(field, value, valueType string) map[string]interface{} {
 	return map[string]interface{}{
-		"id":        "c1",
-		"name":      "test-cond",
 		"priority":  float64(0),
 		"field":     field,
 		"value":     value,
@@ -304,8 +303,8 @@ func TestConditionNodeTransform_UnknownSign(t *testing.T) {
 }
 
 func TestConditionNodeTransform_InvalidProperties(t *testing.T) {
-	// Missing required fields → BuildConditionConfig fails
-	node := makeConditionNode("EQ", map[string]interface{}{"id": "c1"})
+	// Missing required fields → BuildConditionConfig fails (priority absent)
+	node := makeConditionNode("EQ", map[string]interface{}{})
 	meta := rules.CreateRuleMeta("rule1", "")
 	_, err := node.Transform(meta)
 	if err == nil {
@@ -340,12 +339,12 @@ func TestRelationNode_UnmarshalJSON_SingleConditionChild(t *testing.T) {
 		"sign": "AND",
 		"children": [
 			{
+				"id": "c1", "name": "age check",
 				"type": "condition",
 				"sign": "EQ",
 				"cacheable": false,
 				"ignoreAbsence": false,
 				"properties": {
-					"id": "c1", "name": "age check",
 					"field": "age", "value": "18", "valueType": "Number", "priority": 0
 				}
 			}
@@ -373,20 +372,22 @@ func TestRelationNode_UnmarshalJSON_NestedRelation(t *testing.T) {
 				"sign": "AND",
 				"children": [
 					{
+						"id": "c1", "name": "n",
 						"type": "condition",
 						"sign": "EQ",
 						"properties": {
-							"id": "c1", "name": "n", "field": "a", "value": "1",
+							"field": "a", "value": "1",
 							"valueType": "String", "priority": 0
 						}
 					}
 				]
 			},
 			{
+				"id": "c2", "name": "n2",
 				"type": "condition",
 				"sign": "EQ",
 				"properties": {
-					"id": "c2", "name": "n2", "field": "b", "value": "2",
+					"field": "b", "value": "2",
 					"valueType": "String", "priority": 0
 				}
 			}

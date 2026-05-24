@@ -11,13 +11,13 @@ import (
 // condJSON produces the JSON for a single EQ condition node.
 func condJSON(id, name, field, value, valueType string) string {
 	return `{
+		"id": "` + id + `",
+		"name": "` + name + `",
 		"type": "condition",
 		"sign": "EQ",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id": "` + id + `",
-			"name": "` + name + `",
 			"field": "` + field + `",
 			"value": "` + value + `",
 			"valueType": "` + valueType + `",
@@ -125,12 +125,12 @@ func TestDefaultEngine_ANDRule_BothMatch(t *testing.T) {
 		"sign": "AND",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"city","value":"NY","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"city","value":"NY","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -149,12 +149,12 @@ func TestDefaultEngine_ANDRule_OneDoesNotMatch(t *testing.T) {
 		"sign": "AND",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"city","value":"NY","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"city","value":"NY","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -175,12 +175,12 @@ func TestDefaultEngine_ORRule_FirstMatches(t *testing.T) {
 		"sign": "OR",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"name","value":"bob","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"bob","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -199,12 +199,12 @@ func TestDefaultEngine_ORRule_SecondMatches(t *testing.T) {
 		"sign": "OR",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"name","value":"bob","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"bob","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -223,12 +223,12 @@ func TestDefaultEngine_ORRule_NoneMatch(t *testing.T) {
 		"sign": "OR",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"name","value":"bob","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"bob","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -341,12 +341,13 @@ func TestAdvancedEngine_EqualString_False(t *testing.T) {
 
 func TestAdvancedEngine_MissingField_Indeterminate(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"age check",
 		"type": "condition",
 		"sign": "EQ",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"age check","field":"age","value":"18","valueType":"Number","priority":0
+			"field":"age","value":"18","valueType":"Number","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -364,12 +365,13 @@ func TestAdvancedEngine_MissingField_Indeterminate(t *testing.T) {
 
 func TestAdvancedEngine_IgnoreAbsence_ReturnsFalse(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"age check",
 		"type": "condition",
 		"sign": "EQ",
 		"cacheable": true,
 		"ignoreAbsence": true,
 		"properties": {
-			"id":"c1","name":"age check","field":"age","value":"18","valueType":"Number","priority":0
+			"field":"age","value":"18","valueType":"Number","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -395,12 +397,12 @@ func TestAdvancedEngine_ORRule_OneAbsentOneMatch_ReturnsTrue(t *testing.T) {
 		"sign": "OR",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"missing_field","value":"x","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"missing_field","value":"x","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -552,12 +554,12 @@ func TestCeleroRule_Solutions_ORRule_TwoSolutions(t *testing.T) {
 		"sign": "OR",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n1","field":"name","value":"alice","valueType":"String","priority":0}
+				"id":"c1","name":"n1","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"alice","valueType":"String","priority":0}
 			},
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c2","name":"n2","field":"name","value":"bob","valueType":"String","priority":0}
+				"id":"c2","name":"n2","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"name","value":"bob","valueType":"String","priority":0}
 			}
 		]
 	}`
@@ -610,12 +612,13 @@ func TestCeleroRule_SetCacheable(t *testing.T) {
 
 func TestDefaultEngine_CacheableRule_EvaluatesCorrectly(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"name check",
 		"type": "condition",
 		"sign": "EQ",
 		"cacheable": true,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"name check","field":"name","value":"alice","valueType":"String","priority":0
+			"field":"name","value":"alice","valueType":"String","priority":0
 		}
 	}`
 	b, err := engine.FromJSON("r1", raw)
@@ -638,12 +641,13 @@ func TestDefaultEngine_CacheableRule_EvaluatesCorrectly(t *testing.T) {
 
 func TestDefaultEngine_GTCondition_True(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"age gt",
 		"type": "condition",
 		"sign": "GT",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"age gt","field":"age","value":"18","valueType":"Number","priority":0
+			"field":"age","value":"18","valueType":"Number","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -659,12 +663,13 @@ func TestDefaultEngine_GTCondition_True(t *testing.T) {
 
 func TestDefaultEngine_INCondition_Hit(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"status in",
 		"type": "condition",
 		"sign": "IN",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"status in","field":"status","value":"[\"active\",\"pending\"]","valueType":"List","priority":0
+			"field":"status","value":"[\"active\",\"pending\"]","valueType":"List","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -680,12 +685,13 @@ func TestDefaultEngine_INCondition_Hit(t *testing.T) {
 
 func TestDefaultEngine_RegexpCondition_Match(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"email regexp",
 		"type": "condition",
 		"sign": "REGEXP",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"email regexp","field":"email","regexp":"^[a-z]+@example\\.com$","priority":0
+			"field":"email","regexp":"^[a-z]+@example\\.com$","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -701,12 +707,13 @@ func TestDefaultEngine_RegexpCondition_Match(t *testing.T) {
 
 func TestDefaultEngine_CELCondition_True(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"cel check",
 		"type": "condition",
 		"sign": "CEL",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"cel check","expression":"age >= 18","priority":0
+			"expression":"age >= 18","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -722,12 +729,13 @@ func TestDefaultEngine_CELCondition_True(t *testing.T) {
 
 func TestDefaultEngine_ExistsCondition_FieldPresent(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"exists check",
 		"type": "condition",
 		"sign": "EXISTS",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"exists check","field":"params.name","priority":0
+			"field":"params.name","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -743,12 +751,13 @@ func TestDefaultEngine_ExistsCondition_FieldPresent(t *testing.T) {
 
 func TestDefaultEngine_AbsentCondition_FieldMissing(t *testing.T) {
 	raw := `{
+		"id":"c1","name":"absent check",
 		"type": "condition",
 		"sign": "ABSENT",
 		"cacheable": false,
 		"ignoreAbsence": false,
 		"properties": {
-			"id":"c1","name":"absent check","field":"params.age","priority":0
+			"field":"params.age","priority":0
 		}
 	}`
 	rule := buildRule(t, "r1", raw)
@@ -770,8 +779,8 @@ func TestDefaultEngine_NOTRule_NegatesCondition(t *testing.T) {
 		"sign": "NOT",
 		"children": [
 			{
-				"type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
-				"properties": {"id":"c1","name":"n","field":"role","value":"admin","valueType":"String","priority":0}
+				"id":"c1","name":"n","type": "condition", "sign": "EQ", "cacheable": false, "ignoreAbsence": false,
+				"properties": {"field":"role","value":"admin","valueType":"String","priority":0}
 			}
 		]
 	}`

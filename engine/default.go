@@ -74,12 +74,15 @@ func createRoute(matchedIdx []int, unmatchedIdx []int, skippedAt int, conditions
 	return route
 }
 
+// DefaultEngine evaluates rules to a boolean result.
+// Missing parameters are treated as False; use AdvancedEngine for three-valued (Indeterminate) semantics.
 type DefaultEngine struct {
 	enableMissingState bool
 	conditionListeners []ConditionListener
 	ruleListeners      []RuleListener
 }
 
+// NewDefaultEngine returns a DefaultEngine with no listeners registered.
 func NewDefaultEngine() *DefaultEngine {
 	return &DefaultEngine{
 		enableMissingState: false,
@@ -88,6 +91,7 @@ func NewDefaultEngine() *DefaultEngine {
 	}
 }
 
+// AddConditionListener registers a ConditionListener. Listeners are sorted by Order() and called after each condition evaluation.
 func (e *DefaultEngine) AddConditionListener(listener ConditionListener) {
 	e.conditionListeners = append(e.conditionListeners, listener)
 	sort.Slice(e.conditionListeners, func(i, j int) bool {
@@ -95,6 +99,7 @@ func (e *DefaultEngine) AddConditionListener(listener ConditionListener) {
 	})
 }
 
+// AddRuleListener registers a RuleListener. Listeners are sorted by Order() and called after each rule in Evalutes.
 func (e *DefaultEngine) AddRuleListener(listener RuleListener) {
 	e.ruleListeners = append(e.ruleListeners, listener)
 	sort.Slice(e.ruleListeners, func(i, j int) bool {
@@ -102,6 +107,7 @@ func (e *DefaultEngine) AddRuleListener(listener RuleListener) {
 	})
 }
 
+// Evalutes evaluates all rules against ctx in order and fires RuleListeners after each rule.
 func (e *DefaultEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	for _, rule := range rules {
 		result, err := e.Evaluate(rule, ctx)
@@ -112,6 +118,9 @@ func (e *DefaultEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	}
 }
 
+// Evaluate runs a single rule against ctx and returns true if any path fully matches.
+// ConditionListeners are fired after each condition evaluation.
+// RuleListeners are NOT fired here; use Evalutes for rule-level callbacks.
 func (e *DefaultEngine) Evaluate(rule *CeleroRule, ctx *RuleContext) (bool, error) {
 	context, err := buildContext(ctx, rule.IsCacheable(), false)
 	if err != nil {

@@ -8,12 +8,12 @@
       "sign": "AND",
       "children": [
         {
+          "id": "c-spend",
+          "name": "totalSpend >= 500",
           "type": "condition",
           "sign": "GTE",
           "ignoreAbsence": true,
           "properties": {
-            "id": "c-spend",
-            "name": "totalSpend >= 500",
             "priority": 0,
             "field": "totalSpend",
             "value": "500",
@@ -21,12 +21,12 @@
           }
         },
         {
+          "id": "c-level",
+          "name": "memberLevel in [gold, platinum]",
           "type": "condition",
           "sign": "IN",
           "ignoreAbsence": false,
           "properties": {
-            "id": "c-level",
-            "name": "memberLevel in [gold, platinum]",
             "priority": 0,
             "field": "memberLevel",
             "value": "[\"gold\", \"platinum\"]",
@@ -34,11 +34,11 @@
           }
         },
         {
+          "id": "c-days",
+          "name": "registeredDays >= 180",
           "type": "condition",
           "sign": "GTE",
           "properties": {
-            "id": "c-days",
-            "name": "registeredDays >= 180",
             "priority": 0,
             "field": "registeredDays",
             "value": "180",
@@ -46,11 +46,11 @@
           }
         },
         {
+          "id": "c-orders",
+          "name": "orderCount >= 10",
           "type": "condition",
           "sign": "GTE",
           "properties": {
-            "id": "c-orders",
-            "name": "orderCount >= 10",
             "priority": 0,
             "field": "orderCount",
             "value": "10",
@@ -58,11 +58,11 @@
           }
         },
         {
+          "id": "c-banned",
+          "name": "not banned",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-banned",
-            "name": "not banned",
             "priority": 0,
             "field": "banned",
             "value": "false",
@@ -81,11 +81,11 @@
       "sign": "AND",
       "children": [
         {
+          "id": "c-newdays",
+          "name": "registeredDays <= 7",
           "type": "condition",
           "sign": "LTE",
           "properties": {
-            "id": "c-newdays",
-            "name": "registeredDays <= 7",
             "priority": 0,
             "field": "registeredDays",
             "value": "7",
@@ -93,11 +93,11 @@
           }
         },
         {
+          "id": "c-neworders",
+          "name": "orderCount == 0",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-neworders",
-            "name": "orderCount == 0",
             "priority": 0,
             "field": "orderCount",
             "value": "0",
@@ -105,11 +105,11 @@
           }
         },
         {
+          "id": "c-newstatus",
+          "name": "status == active",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-newstatus",
-            "name": "status == active",
             "priority": 0,
             "field": "status",
             "value": "active",
@@ -117,11 +117,11 @@
           }
         },
         {
+          "id": "c-newbanned",
+          "name": "not banned",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-newbanned",
-            "name": "not banned",
             "priority": 0,
             "field": "banned",
             "value": "false",
@@ -140,11 +140,11 @@
       "sign": "AND",
       "children": [
         {
+          "id": "c-vstatus",
+          "name": "status == active",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-vstatus",
-            "name": "status == active",
             "priority": 0,
             "field": "status",
             "value": "active",
@@ -152,11 +152,11 @@
           }
         },
         {
+          "id": "c-vbanned",
+          "name": "not banned",
           "type": "condition",
           "sign": "EQ",
           "properties": {
-            "id": "c-vbanned",
-            "name": "not banned",
             "priority": 0,
             "field": "banned",
             "value": "false",
@@ -168,12 +168,12 @@
           "sign": "OR",
           "children": [
             {
+              "id": "c-age",
+              "name": "age >= 18",
               "type": "condition",
               "sign": "GTE",
               "ignoreAbsence": true,
               "properties": {
-                "id": "c-age",
-                "name": "age >= 18",
                 "priority": 0,
                 "field": "age",
                 "value": "18",
@@ -181,12 +181,12 @@
               }
             },
             {
+              "id": "c-verified",
+              "name": "verified == true",
               "type": "condition",
               "sign": "EQ",
               "ignoreAbsence": false,
               "properties": {
-                "id": "c-verified",
-                "name": "verified == true",
                 "priority": 0,
                 "field": "verified",
                 "value": "true",

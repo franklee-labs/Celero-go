@@ -124,10 +124,10 @@ import (
 )
 
 condNode := rules.ConditionNode{}
+condNode.ID = "cond-status"
+condNode.Name = "Status Check"
 condNode.Sign = "EQ"
 condNode.Props = map[string]interface{}{
-    "id":        "cond-status",
-    "name":      "Status Check",
     "field":     "status",
     "value":     "active",
     "valueType": "String",
@@ -153,7 +153,7 @@ ok, err := eng.Evaluate(rule, ctx) // true
 
 ### Building a Rule from JSON
 
-`FromJSON` accepts the rule id and the JSON of the logic tree root node. Condition properties are nested under a `"properties"` object. Fields such as `cacheable` and `ignoreAbsence` are **top-level** condition node fields, not inside `"properties"`. The `id`, `name`, and `priority` of a condition are placed **inside** `"properties"`.
+`FromJSON` accepts the rule id and the JSON of the logic tree root node. Condition properties are nested under a `"properties"` object. Fields such as `id`, `name`, `cacheable`, and `ignoreAbsence` are **top-level** condition node fields, not inside `"properties"`. Only `priority` and the condition-specific fields (like `field`, `value`, `valueType`) go inside `"properties"`.
 
 ```go
 ruleJSON := `{
@@ -161,13 +161,13 @@ ruleJSON := `{
   "sign": "AND",
   "children": [
     {
+      "id": "age-cond",
+      "name": "Age Check",
       "type": "condition",
       "sign": "GT",
       "cacheable": false,
       "ignoreAbsence": false,
       "properties": {
-        "id": "age-cond",
-        "name": "Age Check",
         "field": "age",
         "value": "18",
         "valueType": "Number",
@@ -208,11 +208,11 @@ This expands to two paths: `[A, B]` and `[A, C]`.
 ```go
 // Mark condition A as cacheable at the node level
 condA := rules.ConditionNode{}
+condA.ID = "cond-a"
+condA.Name = "Email Check"
 condA.Sign = "REGEXP"
 condA.Cacheable = true
 condA.Props = map[string]interface{}{
-    "id":       "cond-a",
-    "name":     "Email Check",
     "field":    "email",
     "regexp":   `^[\w.+-]+@[\w-]+\.[a-z]{2,}$`,
     "priority": 0,
@@ -240,13 +240,13 @@ In JSON, set `cacheable` at the condition node level:
 
 ```json
 {
+  "id": "cond-a",
+  "name": "Email Check",
   "type": "condition",
   "sign": "REGEXP",
   "cacheable": true,
   "ignoreAbsence": false,
   "properties": {
-    "id": "cond-a",
-    "name": "Email Check",
     "field": "email",
     "regexp": "^[\\w.+-]+@[\\w-]+\\.[a-z]{2,}$",
     "priority": 0
@@ -311,10 +311,10 @@ A typical use case for `Indeterminate`: in progressive rule-matching scenarios w
 
 ```go
 condNode := rules.ConditionNode{}
+condNode.ID = "cel-cond"
+condNode.Name = "Age and Status"
 condNode.Sign = "CEL"
 condNode.Props = map[string]interface{}{
-    "id":         "cel-cond",
-    "name":       "Age and Status",
     "expression": "age > 18 && status == 'active'",
     "priority":   0,
 }
@@ -337,13 +337,13 @@ Set `priority` inside the `properties` object of a condition node:
 
 ```json
 {
+  "id":   "cond-1",
+  "name": "Email Format",
   "type": "condition",
   "sign": "REGEXP",
   "cacheable": false,
   "ignoreAbsence": false,
   "properties": {
-    "id":       "cond-1",
-    "name":     "Email Format",
     "field":    "email",
     "regexp":   "^.+@.+$",
     "priority": 1
@@ -368,11 +368,11 @@ Setting `ignoreAbsence = true` on a condition overrides this: a missing paramete
 
 ```go
 condNode := rules.ConditionNode{}
+condNode.ID = "opt-cond"
+condNode.Name = "Optional Tag Check"
 condNode.Sign = "EQ"
 condNode.IgnoreAbsence = true // top-level node field, not in properties
 condNode.Props = map[string]interface{}{
-    "id":        "opt-cond",
-    "name":      "Optional Tag Check",
     "field":     "optionalTag",
     "value":     "vip",
     "valueType": "String",
@@ -384,13 +384,13 @@ condNode.Props = map[string]interface{}{
 
 ```json
 {
+  "id":   "opt-cond",
+  "name": "Optional Tag Check",
   "type": "condition",
   "sign": "EQ",
   "cacheable": false,
   "ignoreAbsence": true,
   "properties": {
-    "id":        "opt-cond",
-    "name":      "Optional Tag Check",
     "field":     "optionalTag",
     "value":     "vip",
     "valueType": "String",
@@ -609,6 +609,39 @@ github.com/franklee-labs/celero-go/
 │                ExistsCondition, AbsentCondition, ...
 └── logic/       AND, OR, NOT relation implementations
 ```
+
+---
+
+## Examples
+
+Runnable examples live in the [`examples/`](examples/) directory. Each example is a standalone `main` package; rules are loaded from shared JSON files in [`examples/shared/data/`](examples/shared/data/).
+
+```bash
+cd examples
+go run ./simple_engine/
+go run ./simple_engine_cached/
+go run ./simple_engine_listeners/
+go run ./advanced_engine/
+go run ./advanced_engine_ignore_absence/
+go run ./advanced_engine_listeners/
+```
+
+| Example | Engine | Demonstrates |
+| --- | --- | --- |
+| [`simple_engine`](examples/simple_engine/main.go) | `DefaultEngine` | Load rules from JSON, evaluate multiple users, print matched/unmatched conditions via `Report` |
+| [`simple_engine_cached`](examples/simple_engine_cached/main.go) | `DefaultEngine` | Cross-path condition result cache — `A AND (B OR C)` shows A evaluated once vs twice |
+| [`simple_engine_listeners`](examples/simple_engine_listeners/main.go) | `DefaultEngine` | `ConditionListener` + `RuleListener` with ordering; listeners share state via `RuleContext` attributes |
+| [`advanced_engine`](examples/advanced_engine/main.go) | `AdvancedEngine` | Three-valued results (`TRUE` / `FALSE` / `INDETERMINATE`) when required fields are absent |
+| [`advanced_engine_ignore_absence`](examples/advanced_engine_ignore_absence/main.go) | `AdvancedEngine` | Per-condition `ignoreAbsence` flag: absent field collapses to `FALSE` instead of `INDETERMINATE` |
+| [`advanced_engine_listeners`](examples/advanced_engine_listeners/main.go) | `AdvancedEngine` | `AdvancedConditionListener` + `AdvancedRuleListener`; events carry `EvalResult` for fine-grained missing-field handling |
+
+The shared rule file [`coupon-rules.json`](examples/shared/data/coupon-rules.json) defines three rules used across most examples:
+
+| Rule ID | Matches when |
+| --- | --- |
+| `high-value-user` | `totalSpend ≥ 500` AND `memberLevel ∈ {gold, platinum}` AND `registeredDays ≥ 180` AND `orderCount ≥ 10` AND not banned |
+| `new-user-welcome` | `registeredDays ≤ 7` AND `orderCount = 0` AND `status = active` AND not banned |
+| `vip-access` | `status = active` AND not banned AND (`age ≥ 18` OR `verified = true`) |
 
 ---
 

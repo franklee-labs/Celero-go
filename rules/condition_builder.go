@@ -52,13 +52,13 @@ func BoolValue(props map[string]interface{}, key string) (bool, error) {
 
 func BuildConditionConfig(conditionNode ConditionNode) (*core.ConditionConfig, error) {
 	props := conditionNode.Properties()
-	id, err := StringValue(props, "id")
-	if err != nil {
-		return nil, err
+	id := conditionNode.ID
+	if id == "" {
+		return nil, fmt.Errorf("condition node missing 'id'")
 	}
-	name, err := StringValue(props, "name")
-	if err != nil {
-		return nil, err
+	name := conditionNode.Name
+	if name == "" {
+		return nil, fmt.Errorf("condition node missing 'name'")
 	}
 	priority, err := IntValue(props, "priority")
 	if err != nil {
