@@ -57,9 +57,9 @@ func BuildConditionConfig(conditionNode ConditionNode) (*core.ConditionConfig, e
 		return nil, fmt.Errorf("condition node missing 'id'")
 	}
 	name := conditionNode.Name
-	if name == "" {
-		return nil, fmt.Errorf("condition node missing 'name'")
-	}
+	// if name == "" {
+	// 	return nil, fmt.Errorf("condition node missing 'name'")
+	// }
 	priority, err := IntValue(props, "priority")
 	if err != nil {
 		return nil, err
