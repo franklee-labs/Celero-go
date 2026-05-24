@@ -8,7 +8,10 @@ import (
 )
 
 func buildContext(ctx *RuleContext, enableConditionResultCache, enableMissingState bool) (*EvalContext, error) {
-	builder := newBuilder(ctx).SetConditionResultCacheable(enableConditionResultCache).SetEnableMissingState(enableMissingState)
+	builder := newBuilder(ctx).
+		SetConditionResultCacheable(enableConditionResultCache).
+		SetEnableMissingState(enableMissingState).
+		EnableReport(ctx.IsReportEnabled())
 	context, err := builder.Build()
 	if err != nil {
 		return nil, err
@@ -102,7 +105,7 @@ func (e *DefaultEngine) AddRuleListener(listener RuleListener) {
 func (e *DefaultEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	for _, rule := range rules {
 		result, err := e.Evaluate(rule, ctx)
-		if err != nil {
+		if err == nil {
 			event := newRuleEvent(rule.rule().ID(), rule.rule().Name(), result, ctx)
 			e.callRuleListeners(event)
 		}

@@ -76,6 +76,14 @@ func (cr *CeleroRule) ID() string {
 	return cr.r.ID()
 }
 
+func (cr *CeleroRule) Name() string {
+	return cr.r.Name()
+}
+
+func (cr *CeleroRule) Description() string {
+	return cr.r.Description()
+}
+
 func (cr *CeleroRule) IsCacheable() bool {
 	return cr.r.Cacheable()
 }

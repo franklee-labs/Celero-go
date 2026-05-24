@@ -37,7 +37,7 @@ func (e *AdvancedEngine) AddRuleListener(listener AdvancedRuleListener) {
 func (e *AdvancedEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 	for _, rule := range rules {
 		result, err := e.Evaluate(rule, ctx)
-		if err != nil {
+		if err == nil {
 			event := newAdvancedRuleEvent(rule.rule().ID(), rule.rule().Name(), result, ctx)
 			e.callRuleListeners(event)
 		}
@@ -46,10 +46,10 @@ func (e *AdvancedEngine) Evalutes(rules []*CeleroRule, ctx *RuleContext) {
 
 func (e *AdvancedEngine) Evaluate(rule *CeleroRule, ctx *RuleContext) (core.EvalResult, error) {
 	context, err := buildContext(ctx, rule.IsCacheable(), true)
-	miss := false
 	if err != nil {
 		return core.EvalResultUnknown, err
 	}
+	miss := false
 	for _, path := range rule.rule().PathGroup().Paths() {
 		rt, err := e.execute(rule, path, context)
 		if err != nil {

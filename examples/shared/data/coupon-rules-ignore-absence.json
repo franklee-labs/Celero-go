@@ -1,0 +1,201 @@
+[
+  {
+    "id": "high-value-user",
+    "name": "High Value User",
+    "description": "User with high total spending and long membership",
+    "rule": {
+      "type": "relation",
+      "sign": "AND",
+      "children": [
+        {
+          "type": "condition",
+          "sign": "GTE",
+          "ignoreAbsence": true,
+          "properties": {
+            "id": "c-spend",
+            "name": "totalSpend >= 500",
+            "priority": 0,
+            "field": "totalSpend",
+            "value": "500",
+            "valueType": "Number"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "IN",
+          "ignoreAbsence": false,
+          "properties": {
+            "id": "c-level",
+            "name": "memberLevel in [gold, platinum]",
+            "priority": 0,
+            "field": "memberLevel",
+            "value": "[\"gold\", \"platinum\"]",
+            "valueType": "List"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "GTE",
+          "properties": {
+            "id": "c-days",
+            "name": "registeredDays >= 180",
+            "priority": 0,
+            "field": "registeredDays",
+            "value": "180",
+            "valueType": "Number"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "GTE",
+          "properties": {
+            "id": "c-orders",
+            "name": "orderCount >= 10",
+            "priority": 0,
+            "field": "orderCount",
+            "value": "10",
+            "valueType": "Number"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-banned",
+            "name": "not banned",
+            "priority": 0,
+            "field": "banned",
+            "value": "false",
+            "valueType": "Boolean"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "new-user-welcome",
+    "name": "New User Welcome",
+    "description": "First-week new users with no orders yet",
+    "rule": {
+      "type": "relation",
+      "sign": "AND",
+      "children": [
+        {
+          "type": "condition",
+          "sign": "LTE",
+          "properties": {
+            "id": "c-newdays",
+            "name": "registeredDays <= 7",
+            "priority": 0,
+            "field": "registeredDays",
+            "value": "7",
+            "valueType": "Number"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-neworders",
+            "name": "orderCount == 0",
+            "priority": 0,
+            "field": "orderCount",
+            "value": "0",
+            "valueType": "Number"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-newstatus",
+            "name": "status == active",
+            "priority": 0,
+            "field": "status",
+            "value": "active",
+            "valueType": "String"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-newbanned",
+            "name": "not banned",
+            "priority": 0,
+            "field": "banned",
+            "value": "false",
+            "valueType": "Boolean"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "vip-access",
+    "name": "VIP Access",
+    "description": "Active unblocked users who are adult or verified",
+    "rule": {
+      "type": "relation",
+      "sign": "AND",
+      "children": [
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-vstatus",
+            "name": "status == active",
+            "priority": 0,
+            "field": "status",
+            "value": "active",
+            "valueType": "String"
+          }
+        },
+        {
+          "type": "condition",
+          "sign": "EQ",
+          "properties": {
+            "id": "c-vbanned",
+            "name": "not banned",
+            "priority": 0,
+            "field": "banned",
+            "value": "false",
+            "valueType": "Boolean"
+          }
+        },
+        {
+          "type": "relation",
+          "sign": "OR",
+          "children": [
+            {
+              "type": "condition",
+              "sign": "GTE",
+              "ignoreAbsence": true,
+              "properties": {
+                "id": "c-age",
+                "name": "age >= 18",
+                "priority": 0,
+                "field": "age",
+                "value": "18",
+                "valueType": "Number"
+              }
+            },
+            {
+              "type": "condition",
+              "sign": "EQ",
+              "ignoreAbsence": false,
+              "properties": {
+                "id": "c-verified",
+                "name": "verified == true",
+                "priority": 0,
+                "field": "verified",
+                "value": "true",
+                "valueType": "Boolean"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
